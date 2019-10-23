@@ -36,6 +36,11 @@ char *getCardName(Card *card);
 void start();
 
 /**
+ *  重新开始
+ */
+void restart();
+
+/**
     创建角色
  */
 void createPlayer();
@@ -59,6 +64,11 @@ void displayPoker(Card **pokers);
     抢地主
  */
 void grabLandlord();
+
+/**
+ *  抢到地主
+ */
+void grabLandlorded(Player *curPlayer);
 
 /**
     开始出牌

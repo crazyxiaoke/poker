@@ -16,28 +16,31 @@
 
 using namespace std;
 
-typedef enum PlayerType{
-    Landlord,
-    Farmer
-}PlayerType;
+typedef enum PlayerType
+{
+  Landlord,
+  Farmer
+} PlayerType;
 
-class Player{
+class Player
+{
 public:
-    Player();
-    Player(const char* name,int cardsCount);
-    char* getName();
-    int getCardsCount();
-    void addCards(Card* card);
-    void removeCards(Card* card);
-    vector<Card*>& getCards();
-    void setPlayerType(PlayerType playerType);
-    PlayerType getPlayerType();
-private:
-    char* name;
-    vector<Card*> cards;
-    int cardsCount;
-    PlayerType playerType;
+  Player();
+  Player(const char *name, int cardsCount);
+  char *getName();
+  int getCardsCount();
+  void addCards(Card *card);
+  void removeCards(Card *card);
+  vector<Card *> &getCards();
+  void setPlayerType(PlayerType playerType);
+  PlayerType getPlayerType();
+  void clearCards();
 
+private:
+  char *name;
+  vector<Card *> cards;
+  int cardsCount;
+  PlayerType playerType;
 };
 
 #endif /* Player_hpp */

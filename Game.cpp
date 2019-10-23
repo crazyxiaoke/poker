@@ -42,6 +42,21 @@ void start()
   play();
 }
 
+void reStart()
+{
+  //洗牌
+  Card **shuffle = shufflePoker(pokers);
+  //发牌
+  displayPoker(shuffle);
+  free(shuffle);
+  //打印各方手牌
+  printPlayerCards();
+  //抢地主
+  grabLandlord();
+  //开始打牌
+  play();
+}
+
 void createPoker()
 {
   int i = 0;
@@ -116,28 +131,68 @@ void grabLandlord()
 {
   int score = 0;
   int index = 0;
+  int noGrabCount = 0;
+  Player *lastGrabPalyer;
   while (true)
   {
+    int _score = 0;
     Player *curPlayer = gloablPlayers[index++];
-    cout << curPlayer->getName() << "开始抢地主:";
-    cin >> score;
+    cout << "【" << curPlayer->getName() << "】"
+         << "开始抢地主" << endl;
+    cout << "【" << curPlayer->getName() << "】:";
+    cin >> _score;
+    if (_score == -1)
+    {
+      noGrabCount++;
+      if (noGrabCount == PLAYER_COUNT)
+      {
+        grabLandlorded(gloablPlayers[0]);
+        return;
+      }
+      else if (noGrabCount == PLAYER_COUNT - 1)
+      {
+        grabLandlorded(lastGrabPalyer);
+        return;
+      }
+      cout << "【" << curPlayer->getName() << "】"
+           << "不抢地主" << endl;
+      continue;
+    }
+    if (_score <= score)
+    {
+      cout << "【" << curPlayer->getName() << "】:"
+           << "报分必须比上个玩家报的分高" << endl;
+      continue;
+    }
+    lastGrabPalyer = curPlayer;
+    score = _score;
     if (score == 3)
     {
-      curPlayer->setPlayerType(Landlord);
-      cout << curPlayer->getName() << "抢到地主了" << endl;
-      //打印地主牌
-      mutil::sort(landlordCard, LANDLORD_CARD_COUNT);
-      cout << "地主牌:";
-      for (int i = 0; i < LANDLORD_CARD_COUNT; i++)
-      {
-        curPlayer->addCards(landlordCard[i]);
-        cout << getCardName(landlordCard[i]) << " ";
-      }
-      cout << endl;
-      printPlayerCards();
+      grabLandlorded(curPlayer);
       return;
     }
   }
+}
+
+/*
+  抢到地主
+*/
+void grabLandlorded(Player *curPlayer)
+{
+  cout << curPlayer << endl;
+  curPlayer->setPlayerType(Landlord);
+  cout << "【" << curPlayer->getName() << "】"
+       << "抢到地主了" << endl;
+  //打印地主牌
+  mutil::sort(landlordCard, LANDLORD_CARD_COUNT);
+  cout << "地主牌:";
+  for (int i = 0; i < LANDLORD_CARD_COUNT; i++)
+  {
+    curPlayer->addCards(landlordCard[i]);
+    cout << getCardName(landlordCard[i]) << " ";
+  }
+  cout << endl;
+  printPlayerCards();
 }
 
 void play()
@@ -154,7 +209,8 @@ void play()
   while (true)
   {
     Player *curPlayer = gloablPlayers[index % PLAYER_COUNT];
-    cout << curPlayer->getName() << "开始出牌:";
+    cout << "【" << curPlayer->getName() << "】"
+         << "开始出牌:";
     vector<int> popCardIndexs;
     int cardNums;
     while (cin >> cardNums)
@@ -168,7 +224,8 @@ void play()
         }
         else
         {
-          cout << "出牌类型错误" << endl;
+          cout << "【" << curPlayer->getName() << "】"
+               << "出牌类型错误" << endl;
           popCardIndexs.clear();
           continue;
         }
@@ -176,7 +233,8 @@ void play()
       else if (cardNums == -2)
       {
         passCount++;
-        cout << curPlayer->getName() << "要不起" << endl;
+        cout << "【" << curPlayer->getName() << "】"
+             << "要不起" << endl;
         break;
       }
       else
@@ -191,7 +249,7 @@ void play()
     }
     if (curPlayer->getCardsCount() == 0)
     {
-      cout << "打牌结束" << endl;
+      cout << "====================打牌结束====================" << endl;
       gameOver(curPlayer);
       break;
     }
@@ -210,8 +268,10 @@ bool popCards(Player *player, vector<int> popCardIndexs)
   mutil::sort(playCards, count);
   if (rlue.compareCards(playCards, lastCards, lastType))
   {
+    system("clear");
     lastCards = playCards;
-    cout << player->getName() << "打出：";
+    cout << "【" << player->getName() << "】"
+         << "打出：";
     for (int i = 0; i < playCards.size(); i++)
     {
       cout << getCardName(playCards[i]);
@@ -231,11 +291,18 @@ void gameOver(Player *player)
 {
   if (player->getPlayerType() == Landlord)
   {
-    cout << "地主赢了" << endl;
+    cout << "【" << player->getName() << "】"
+         << "地主赢了" << endl;
   }
   else
   {
-    cout << "农民赢了" << endl;
+    cout << "【" << player->getName() << "】"
+         << "农民赢了" << endl;
+  }
+
+  for (int i = 0; i < PLAYER_COUNT; i++)
+  {
+    gloablPlayers[i]->clearCards();
   }
 }
 
@@ -303,9 +370,11 @@ void printPlayerCards()
   {
     mutil::sort(gloablPlayers[i]->getCards(),
                 gloablPlayers[i]->getCardsCount());
-    cout << gloablPlayers[i]->getName() << ".手牌数:"
+    cout << "【" << gloablPlayers[i]->getName() << "】"
+         << ".手牌数:"
          << gloablPlayers[i]->getCardsCount() << endl;
-    cout << gloablPlayers[i]->getName() << ".手牌:";
+    cout << "【" << gloablPlayers[i]->getName() << "】"
+         << ".手牌:";
     for (int j = 0; j < gloablPlayers[i]->getCardsCount(); j++)
     {
       cout << getCardName(gloablPlayers[i]->getCards()[j])
